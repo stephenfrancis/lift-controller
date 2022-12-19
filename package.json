@@ -1,0 +1,18 @@
+{
+  "name": "lift-controller",
+  "packageManager": "yarn@3.2.0",
+  "version": "0.0.1",
+  "description": "Controller software imagined for lifts",
+  "author": "stephen.d.francis@gmail.com",
+  "scripts": {
+    "compile": "tsc --noEmit",
+    "model": "./node_modules/.bin/ts-node -r tsconfig-paths/register ./src/Model.ts"
+  },
+  "dependencies": {
+    "ts-node": "^10.8.0",
+    "tsc": "^2.0.4",
+    "tsconfig-paths": "^4.1.0",
+    "tslib": "^2.4.0",
+    "typescript": "^4.6.4"
+  }
+}

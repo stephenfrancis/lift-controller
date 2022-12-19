@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "esModuleInterop": true,
+    "importsNotUsedAsValues": "preserve",
+    "jsx": "react",
+    "lib": ["ES2015", "dom"],
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "target": "es6"
+  }
+}
