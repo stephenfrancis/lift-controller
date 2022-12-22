@@ -1,16 +1,18 @@
 import { Controller } from "./Controller";
 import { Lift } from "./Lift";
 
-interface Person {
+type PersonStatus = "WAITING" | "IN_LIFT" | "ARRIVED";
+export interface Person {
   id: number;
   fromFloor: number;
   toFloor: number;
   lift: Lift | null;
+  status: PersonStatus;
 }
 
-const NUMBER_OF_PEOPLE = 3;
-const NUMBER_OF_LIFTS = 1;
-const NUMBER_OF_FLOORS = 10;
+export const NUMBER_OF_PEOPLE = 10;
+export const NUMBER_OF_LIFTS = 3;
+export const NUMBER_OF_FLOORS = 10;
 
 export class Model {
   private controller: Controller;
@@ -27,14 +29,22 @@ export class Model {
       // if ((this.completed = NUMBER_OF_PEOPLE)) {
       //   clearInterval(i);
       // }
-    }, 100);
+    }, 50);
+  }
+
+  getController(): Controller {
+    return this.controller;
+  }
+
+  getPeople(): Person[] {
+    return this.people;
   }
 
   setupPeople(): void {
     for (let i = 0; i < NUMBER_OF_PEOPLE; i += 1) {
       setTimeout(() => {
         this.setupPerson(i);
-      }, i * 3000);
+      }, i * 300);
     }
   }
 
@@ -44,6 +54,7 @@ export class Model {
       fromFloor: Math.floor(Math.random() * NUMBER_OF_FLOORS),
       toFloor: Math.floor(Math.random() * NUMBER_OF_FLOORS),
       lift: null,
+      status: "WAITING",
     };
     if (p.fromFloor === p.toFloor) {
       p.toFloor = p.fromFloor === 0 ? 1 : p.fromFloor - 1;
@@ -71,6 +82,7 @@ export class Model {
     if (lift.getFloor() !== p.fromFloor) {
       throw new Error(`incorrect entry floor`);
     }
+    p.status = "IN_LIFT";
     lift.pressButton(p.toFloor, (lift2: Lift) => {
       this.personExitsLift(p, lift2);
     });
@@ -83,8 +95,9 @@ export class Model {
     if (lift.getFloor() !== p.toFloor) {
       throw new Error(`incorrect exit floor`);
     }
+    p.status = "ARRIVED";
     this.completed += 1;
   }
 }
 
-new Model();
+// new Model();

@@ -16,6 +16,10 @@ export class Controller {
     this.lifts[lift].addRequest(request);
   }
 
+  getLifts(): Lift[] {
+    return this.lifts;
+  }
+
   tick(): void {
     this.lifts.forEach((lift) => lift.tick());
   }
