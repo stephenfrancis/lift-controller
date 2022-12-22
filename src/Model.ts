@@ -26,10 +26,10 @@ export class Model {
     this.setupPeople();
     const interval = setInterval(() => {
       this.controller.tick();
-      // if ((this.completed = NUMBER_OF_PEOPLE)) {
-      //   clearInterval(i);
-      // }
-    }, 50);
+      if (this.completed === NUMBER_OF_PEOPLE) {
+        clearInterval(interval);
+      }
+    }, 100);
   }
 
   getController(): Controller {
@@ -40,39 +40,11 @@ export class Model {
     return this.people;
   }
 
-  setupPeople(): void {
-    for (let i = 0; i < NUMBER_OF_PEOPLE; i += 1) {
-      setTimeout(() => {
-        this.setupPerson(i);
-      }, i * 300);
+  private getRandomFloor(): number {
+    if (Math.random() < 0.3) {
+      return 0; // skew to ground floor
     }
-  }
-
-  setupPerson(id: number): void {
-    const p: Person = {
-      id,
-      fromFloor: Math.floor(Math.random() * NUMBER_OF_FLOORS),
-      toFloor: Math.floor(Math.random() * NUMBER_OF_FLOORS),
-      lift: null,
-      status: "WAITING",
-    };
-    if (p.fromFloor === p.toFloor) {
-      p.toFloor = p.fromFloor === 0 ? 1 : p.fromFloor - 1;
-    }
-    this.people.push(p);
-    console.log(
-      `Person ${p.id} is waiting at floor ${p.fromFloor} to go to ${p.toFloor}`
-    );
-    this.controller.addRequest({
-      floor: p.fromFloor,
-      type:
-        p.toFloor > p.fromFloor
-          ? "FROM_OUTSIDE_GOING_UP"
-          : "FROM_OUTSIDE_GOING_DOWN",
-      callback: (lift: Lift) => {
-        this.personEntersLift(p, lift);
-      },
-    });
+    return Math.floor(Math.random() * NUMBER_OF_FLOORS);
   }
 
   personEntersLift(p: Person, lift: Lift): void {
@@ -98,6 +70,39 @@ export class Model {
     p.status = "ARRIVED";
     this.completed += 1;
   }
-}
 
-// new Model();
+  setupPeople(): void {
+    for (let i = 0; i < NUMBER_OF_PEOPLE; i += 1) {
+      setTimeout(() => {
+        this.setupPerson(i);
+      }, i * 1000);
+    }
+  }
+
+  setupPerson(id: number): void {
+    const p: Person = {
+      id,
+      fromFloor: this.getRandomFloor(),
+      toFloor: this.getRandomFloor(),
+      lift: null,
+      status: "WAITING",
+    };
+    if (p.fromFloor === p.toFloor) {
+      p.toFloor = p.fromFloor === 0 ? 1 : p.fromFloor - 1;
+    }
+    this.people.push(p);
+    console.log(
+      `Person ${p.id} is waiting at floor ${p.fromFloor} to go to ${p.toFloor}`
+    );
+    this.controller.addRequest({
+      floor: p.fromFloor,
+      type:
+        p.toFloor > p.fromFloor
+          ? "FROM_OUTSIDE_GOING_UP"
+          : "FROM_OUTSIDE_GOING_DOWN",
+      callback: (lift: Lift) => {
+        this.personEntersLift(p, lift);
+      },
+    });
+  }
+}

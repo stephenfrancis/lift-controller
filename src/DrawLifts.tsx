@@ -20,11 +20,22 @@ export const DrawLifts: React.FC<DrawLiftsProps> = (props) => {
   const liftHeight = floorHeight - 10;
   for (let i = 0; i < props.lifts.length; i += 1) {
     children.push(
-      <DrawLiftShaft x={400 + 70 * i} y={0} height={props.height} />
+      <DrawLiftShaft x={500 + 70 * i} y={0} height={props.height} />
     );
     const liftFloor = props.lifts[i].getFloor();
     const yPos = (props.numberOfFloors - liftFloor - 1) * floorHeight + 5;
-    children.push(<DrawLift x={405 + 70 * i} y={yPos} height={liftHeight} />);
+    const doorsOpen =
+      ["DOORS_OPEN_WAITING", "DOORS_CLOSING"].indexOf(
+        props.lifts[i].getActualState()
+      ) > -1;
+    children.push(
+      <DrawLift
+        x={505 + 70 * i}
+        y={yPos}
+        height={liftHeight}
+        doorsOpen={doorsOpen}
+      />
+    );
   }
   return <>{children}</>;
 };
@@ -43,13 +54,14 @@ interface DrawLiftProps {
   x: number;
   y: number;
   height: number;
+  doorsOpen: boolean;
 }
 
 const DrawLift: React.FC<DrawLiftProps> = (props) => (
   <rect
     {...props}
     width={40}
-    fill="transparent"
+    fill={props.doorsOpen ? "transparent" : "#000"}
     stroke="#000"
     strokeWidth={5}
   />

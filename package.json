@@ -8,7 +8,7 @@
     "build": "esbuild ./src/App.tsx --bundle --minify --sourcemap --platform=browser --define:global=window --outdir=./dist",
     "clean": "rm dist/*",
     "compile": "tsc --noEmit",
-    "model": "./node_modules/.bin/ts-node -r tsconfig-paths/register ./src/Model.ts",
+    "model": "./node_modules/.bin/ts-node -r tsconfig-paths/register ./src/Run.ts",
     "serve": "node ./src/Serve.js",
     "watch": "esbuild ./src/App.tsx --bundle --minify --sourcemap --platform=browser --define:global=window --outdir=./dist --watch"
   },

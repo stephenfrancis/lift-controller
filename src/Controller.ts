@@ -11,13 +11,34 @@ export class Controller {
   }
 
   addRequest(request: Request): void {
-    // choose lift - come up with better solution
-    const lift = Math.floor(Math.random() * this.lifts.length);
-    this.lifts[lift].addRequest(request);
+    this.getNearestLift(request).addRequest(request);
   }
 
   getLifts(): Lift[] {
     return this.lifts;
+  }
+
+  getNearestLift(request: Request): Lift {
+    const liftsAndDistances = this.lifts
+      .map((lift) => ({
+        lift: lift,
+        distance: lift.getDistanceTo(request.floor, request.type),
+      }))
+      .sort((a, b) => a.distance - b.distance);
+    // .map((obj) => {
+    //   console.log(
+    //     ` at floor ${
+    //       request.floor
+    //     }, lift ${obj.lift.getId()} [at ${obj.lift.getFloor()}] gives: ${
+    //       obj.distance
+    //     }`
+    //   );
+    //   return obj;
+    // });
+    if (liftsAndDistances.length === 0) {
+      throw new Error(`no lifts available`);
+    }
+    return liftsAndDistances[0].lift;
   }
 
   tick(): void {

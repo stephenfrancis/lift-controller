@@ -1,11 +1,6 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
-import {
-  Model,
-  NUMBER_OF_FLOORS,
-  NUMBER_OF_LIFTS,
-  NUMBER_OF_PEOPLE,
-} from "./Model";
+import { Model, NUMBER_OF_FLOORS } from "./Model";
 import { DrawFloors } from "./DrawFloors";
 import { DrawLifts } from "./DrawLifts";
 import { DrawPeople } from "./DrawPeople";
@@ -18,7 +13,8 @@ const height = 800;
 const App: React.FC = (props) => {
   const m = new Model();
   return (
-    <div>
+    <div style={{ padding: 10 }}>
+      <h2>Lift Controller</h2>
       <svg
         width={width * SCALE_X}
         height={height * SCALE_Y}

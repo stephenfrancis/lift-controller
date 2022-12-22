@@ -51,47 +51,38 @@ export class Lift {
     this.requests = [];
   }
 
+  private actionRequestsForThisFloor(): void {
+    // fire callbacks - they may add new requests
+    // can't use forEach as this.requests may be changed during loop
+    for (let i = 0; i < this.requests.length; i += 1) {
+      if (this.requests[i].floor === this.floor) {
+        this.requests[i].callback(this);
+      }
+    }
+    let i = 0;
+    while (i < this.requests.length) {
+      if (this.requests[i].floor === this.floor) {
+        this.requests.splice(i, 1); // delete request
+      } else {
+        i += 1;
+      }
+    }
+  }
+
   addRequest(request: Request): void {
     if (request.floor > this.topFloor || request.floor < this.bottomFloor) {
       throw new Error(
         `invalid floor: ${request.floor}, lift ${this.id} has range: ${this.bottomFloor} - ${this.topFloor}`
       );
     }
-    if (
-      this.requests.find(
-        (req) => req.floor === request.floor && req.type === request.type
-      )
-    ) {
-      return; // ignore any request we already have;
+    if (this.intentionState === "WAITING" && this.floor === request.floor) {
+      request.callback(this);
+      return;
     }
     this.requests.push(request);
   }
 
-  getId(): string {
-    return this.id;
-  }
-
-  getFloor(): number {
-    return this.floor;
-  }
-
-  pressButton(floor: number, callback: (lift: Lift) => void): void {
-    this.addRequest({
-      type: "FROM_INSIDE",
-      floor,
-      callback,
-    });
-  }
-
-  tick(): void {
-    if (this.countDown > 0) {
-      this.countDown -= 1;
-    } else {
-      this.finalCountdown();
-    }
-  }
-
-  finalCountdown(): void {
+  private finalCountdown(): void {
     switch (this.actualState) {
       case "GOING_UP":
       case "GOING_DOWN":
@@ -120,7 +111,45 @@ export class Lift {
     this.countDown = COUNTER[this.actualState];
   }
 
-  moveToNextFloor(): void {
+  getActualState(): ActualState {
+    return this.actualState;
+  }
+
+  getDistanceTo(floor: number, requestType: RequestType): number {
+    if (this.intentionState === "WAITING" && floor == this.floor) {
+      return 0;
+    }
+    if (this.intentionState !== "GOING_DOWN" && floor > this.floor) {
+      return floor - this.floor;
+    }
+    if (this.intentionState !== "GOING_UP" && floor < this.floor) {
+      return this.floor - floor;
+    }
+    if (floor > this.floor) {
+      // going down - assume to bottom - then back up
+      return this.floor - this.bottomFloor + floor;
+    }
+    // going up - assume to top - then back down
+    return this.topFloor - this.floor + (this.topFloor - floor);
+  }
+
+  getFloor(): number {
+    return this.floor;
+  }
+
+  getId(): string {
+    return this.id;
+  }
+
+  getIntentionState(): IntentionState {
+    return this.intentionState;
+  }
+
+  private hasRequestsForThisFloor(): boolean {
+    return !!this.requests.find((req) => req.floor === this.floor);
+  }
+
+  private moveToNextFloor(): void {
     if (["GOING_UP", "GOING_DOWN"].indexOf(this.actualState) === -1) {
       throw new Error(`not moving, status: ${this.actualState}`);
     }
@@ -132,38 +161,15 @@ export class Lift {
     }
   }
 
-  hasRequestsForThisFloor(): boolean {
-    return !!this.requests.find((req) => req.floor === this.floor);
+  pressButton(floor: number, callback: (lift: Lift) => void): void {
+    this.addRequest({
+      type: "FROM_INSIDE",
+      floor,
+      callback,
+    });
   }
 
-  actionRequestsForThisFloor(): void {
-    // fire callbacks - they may add new requests
-    // can't use forEach as this.requests may be changed during loop
-    let i = 0;
-    while (i < this.requests.length) {
-      if (this.requests[i].floor === this.floor) {
-        this.requests[i].callback(this);
-      }
-      i += 1;
-    }
-    i = 0;
-    while (i < this.requests.length) {
-      if (this.requests[i].floor === this.floor) {
-        this.requests.splice(i, 1); // delete request
-      } else {
-        i += 1;
-      }
-    }
-  }
-
-  setOffIfRemainingRequests(): void {
-    // if (this.requests.length > 0) {
-    //   console.log(
-    //     `setOffIfRemainingRequests() requests: ${this.requests.map(
-    //       (req) => req.type + ": " + req.floor
-    //     )}`
-    //   );
-    // }
+  private setOffIfRemainingRequests(): void {
     const requestsInSameDirection = this.requests.find(
       (req) =>
         (this.intentionState === "GOING_UP" &&
@@ -194,6 +200,14 @@ export class Lift {
     if (this.intentionState !== "WAITING") {
       this.actualState = this.intentionState;
       console.log(`lift ${this.id} has requests ${this.intentionState}`);
+    }
+  }
+
+  tick(): void {
+    if (this.countDown > 0) {
+      this.countDown -= 1;
+    } else {
+      this.finalCountdown();
     }
   }
 }
